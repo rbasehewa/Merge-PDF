@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <base href="https://mozilla.github.io/pdf.js/" />
+    <meta charset="UTF-8">
+    <title>Previous/Next example</title>
+</head>
+<body onload="load()">
+
+<div>
+    <button id="prev">Previous</button>
+    <button id="next">Next</button>
+    &nbsp; &nbsp;
+    <span>Page: <span id="page_num"></span> / <span id="page_count"></span></span>
+</div>
+
+<div>
+    <canvas id="the-canvas" style="border:1px solid black"></canvas>
+</div>
+
+<script src="build/pdf.js"></script>
+
+</body>
+</html>
