@@ -10,3 +10,9 @@
  * Check ouput folder in your unzip folder collections 
  
  - Note: pdf files will be merged in order from the top file upload field to the bottom file upload field
+
+
+ ### Next version I'm about to develop:
+
+* Handle all the exceptions
+* Change behaviour of the merge PDF file
