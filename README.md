@@ -1,7 +1,7 @@
 ## How to use the tool
  * Open a terminal in the project folder
  * Run npm install to install project dependencies
- * Run node Node.js to start the backend server
+ * Run node Main.js to start the backend server
  * Open the index.html file to open the frontend (http://localhost:8080/)
  * Upload your first pdf file to the first file upload field
  * Upload your second pdf file to the second file upload field
