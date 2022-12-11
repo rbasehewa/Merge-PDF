@@ -15,7 +15,7 @@
     "canvasjs": "^1.8.1",
     "debug": "^4.1.1",
     "easy-pdf-merge": "^0.2.2",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-formidable": "^1.2.0",
     "formidable": "^1.2.1",
     "hummus": "^1.0.105",
