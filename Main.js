@@ -2,6 +2,14 @@ var express = require('express');
 var app = express();
 var path = require('path');
 var multer = require('multer');
+var crypto = require('crypto');
+var fs = require('fs');
+var execFile = require('child_process').execFile;
+
+// easy-pdf-merge shells out via a joined command string and fails to quote
+// its own jar path, which breaks on Windows paths containing spaces. Invoke
+// the jar it bundles directly with an argument array instead (no shell).
+var pdfBoxJar = path.join(__dirname, 'node_modules', 'easy-pdf-merge', 'jar', 'pdfbox.jar');
 
 
 var storage = multer.diskStorage({
@@ -9,7 +17,7 @@ var storage = multer.diskStorage({
     cb(null, 'uploads')
   },
   filename: function (req, file, cb) {
-    cb(null, file.originalname)
+    cb(null, crypto.randomUUID() + '.pdf')
   }
 })
 
@@ -26,30 +34,42 @@ app.get('/', function (req, res) {
 // POST method route
 
 app.post('/fileupload', upload.array('pdfs', 12), function (req, res, next) {
-  console.log(req.fields);
-  const merge = require('easy-pdf-merge');
-  const urls = [];
-  const newpath = 'output/out.pdf';
+  const files = req.files || [];
+  const cleanup = function () {
+    files.forEach(function (file) { fs.unlink(file.path, function () {}); });
+  };
 
-  req.files.forEach((file) => {
-    urls.push(file.path);
-  })
+  if (files.length < 2) {
+    cleanup();
+    return res.status(400).json({ ok: false, message: 'Select at least two PDFs to merge.' });
+  }
 
-  merge(urls, newpath, function (err) {
+  const newpath = path.join(__dirname, 'output', 'out.pdf');
+  const urls = files.map(function (file) { return file.path; });
 
-    if (err)
-      res.send(err);
-    else
-      
+  execFile('java', ['-jar', pdfBoxJar, 'PDFMerger'].concat(urls, [newpath]), function (err) {
+    cleanup();
 
-    // res.send('Successfully merged!');
-    console.log("Successfully merged!");
-    
-    res.redirect('http://localhost:8080') ;
-    
-  
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ ok: false, message: 'Something went wrong while combining your PDFs.' });
+    }
+
+    fs.stat(newpath, function (statErr, stats) {
+      console.log('Successfully merged!');
+      res.json({ ok: true, filename: 'combined.pdf', size: statErr ? null : stats.size });
+    });
   });
 
+});
+
+app.get('/download', function (req, res) {
+  const filePath = path.join(__dirname, 'output', 'out.pdf');
+  res.download(filePath, 'combined.pdf', function (err) {
+    if (err && !res.headersSent) {
+      res.status(404).send('No merged file is available yet.');
+    }
+  });
 });
 
 app.listen(8080);
